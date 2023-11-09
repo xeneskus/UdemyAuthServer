@@ -16,7 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -31,42 +30,43 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"), sqlOptions =>
     {
-        sqlOptions.MigrationsAssembly("UdemyAuthServer.Data");//migration data katmanýnda istiyoruz
+        sqlOptions.MigrationsAssembly("UdemyAuthServer.Data");
     });
 });
 
 
 builder.Services.AddIdentity<UserApp, IdentityRole>(options =>
 {
-    options.User.RequireUniqueEmail = true; //veritabanýnýnda uniq olmasýný istedik emailin
-    options.Password.RequireNonAlphanumeric = false; //non alphanemetik yýldýz soru iþareti gibi þeyler olmasýn desin alphanamitk olanlar a dan z olanlar non olan yýldýz vs
+    options.User.RequireUniqueEmail = true; 
+    options.Password.RequireNonAlphanumeric = false; 
 
-}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders(); //kullanýcým user app rolüm ise ýdentity kütüphanesinden gelen default 
-//adddefault token þifre sýfýrlama gibi iþlemlerde token üretiyoruz bu tokený üretmek için defautprovide saðlýyor
+}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders(); 
+
+
 builder.Services.Configure<CustomTokenOptions>(builder.Configuration.GetSection("TokenOption"));
 builder.Services.Configure<List<Client>>(builder.Configuration.GetSection("Clients"));
 var tokenOptions = builder.Configuration.GetSection("TokenOption").Get<CustomTokenOptions>();
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; // bu þema iki tane ayrý üyelik sistemi olabilir bayiler için ayrý normal kullanýcý için ayrý üyelik olabilir. kullanýcý olarak gir bayi olarak gir bunlara þema diyoruz bizde tek üyelik sistemi var birden fazla olsaydý "Bayi","Kullanýcý" diyerek ayýrabilirdik.
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; // þemalarý birbirine baðladýk.
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; 
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme; 
 
-}).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => //Jwt bazlý kimlik doðrulama yaptýk API projesi olduðu için diðer türlü cookie bazlý 
+}).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, opts => 
 {
     opts.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
     {
-        ValidIssuer = tokenOptions.Issuer,  //gelen issuer ile tanýmlanan issuer ayný ise doðrulanacak
+        ValidIssuer = tokenOptions.Issuer,  
         ValidAudience = tokenOptions.Audience[0],
         IssuerSigningKey=SignService.GetSymmetricSecurityKey(tokenOptions.SecurityKey),
 
 
-        ValidateIssuerSigningKey=true,//imzasýný doðrula
-        ValidateAudience=true, //audience ý doðrula
-        ValidateIssuer=true, //gerçekten benim gönderdiðim issuer mu kontrol et
-        ValidateLifetime=true,//ömrünü kontrol et geçmiþ mi geçerli mi
+        ValidateIssuerSigningKey=true,
+        ValidateAudience=true, 
+        ValidateIssuer=true, 
+        ValidateLifetime=true,
 
-        ClockSkew=TimeSpan.Zero//bir token a 1 saat zaman verince default olarak fazladan 5dakika zaman veriyor. farklý serverlarýn kurmuþ olduðu token ömürlerini doðrulama esnasýnda 10 saniye 30 saniye fark olacaktýr mutlaka o farký tolera etmek için 5 dakika ekliyor. Biz tam ayný zamanda serverlar çalýþacak dedik. Tek Api varsa yine zeroya çevirmek uygundur.
+        ClockSkew=TimeSpan.Zero
     };
 });
 

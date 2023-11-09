@@ -4,7 +4,7 @@ using UdemyAuthServer.Core.Repositories;
 
 namespace UdemyAuthServer.Data.Repositories
 {
-    public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tentity : class //eneric oldugundan doalyı birde tentity veriyoruz classtan aldıgımız tentityi interface imize veiryoruz ardından where ile tentityin bir class olacagını söyledik
+    public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tentity : class 
     {
         private readonly DbContext _context;
         private readonly DbSet<Tentity> _dbset;
@@ -12,7 +12,7 @@ namespace UdemyAuthServer.Data.Repositories
         public GenericRepository(AppDbContext context)
         {
             _context = context;
-            _dbset = context.Set<Tentity>();//üzerinde çalışacagımız entity verdik
+            _dbset = context.Set<Tentity>();
         }
 
         public async Task AddAsync(Tentity entity)
@@ -30,7 +30,7 @@ namespace UdemyAuthServer.Data.Repositories
             var entity = await _dbset.FindAsync(id);
             if (entity!=null)
             {
-                _context.Entry(entity).State = EntityState.Detached;// neden bunu yapıyorum üstteki id in takip edilmesini istemiyoruz memoryde tutulmasını istemiyoruz
+                _context.Entry(entity).State = EntityState.Detached;
             }
             return entity;
         }
@@ -42,8 +42,7 @@ namespace UdemyAuthServer.Data.Repositories
 
         public Tentity Update(Tentity entity)
         {
-            //
-            _context.Entry(entity).State = EntityState.Modified; //aynı olsa dahi tüm alanları günceller
+            _context.Entry(entity).State = EntityState.Modified; 
             return entity;
         }
 

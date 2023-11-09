@@ -8,8 +8,7 @@ namespace UdemyAuthServer.Core.Repositories
 
         Task<IEnumerable<TEntity>> GetAllAsync();
 
-        IQueryable<TEntity> Where(Expression<Func<TEntity,bool>> predicate); //func delegeyi temsil ediyor bir metotu işaret ediyor entityi ve geriye bool dönecek
-        //where(X=>x.id>5) buradaki x=> tentitye karşılık geliyor. x.id>5 bool kısmı büyük mü deegil mi
+        IQueryable<TEntity> Where(Expression<Func<TEntity,bool>> predicate); 
         Task AddAsync(TEntity entity);
 
         void Remove(TEntity entity);

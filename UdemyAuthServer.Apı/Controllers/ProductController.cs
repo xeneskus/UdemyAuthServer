@@ -34,7 +34,6 @@ namespace UdemyAuthServer.API.Controllers
         {
             return ActionResultInstance(await _productService.Update(productDto,productDto.Id));
         }   
-        //api/product/2 sondaki 2 aşaağıdaki idye karşılık gelicek
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {

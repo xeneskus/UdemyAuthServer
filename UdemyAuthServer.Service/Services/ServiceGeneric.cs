@@ -31,7 +31,7 @@ namespace UdemyAuthServer.Service.Services
         public async Task<Response<IEnumerable<TDto>>> GetAllAsync()
         {
             var products = ObjectMapper.Mapper.Map<List<TDto>>(await _genericRepository.GetAllAsync()); 
-            return Response<IEnumerable<TDto>>.Success(products, 200);  //gelen data üzerinde başka işlem yoksa ıenumarable dönebilirsin
+            return Response<IEnumerable<TDto>>.Success(products, 200); 
 
         }
 
@@ -41,9 +41,9 @@ namespace UdemyAuthServer.Service.Services
 
             if (product==null) 
             {
-                return Response<TDto>.Fail("Id not found", 404, true); // yeni response oluşturuyoruz fail ile hata verdik  durum kodu verdik birde 404 hata kodu en son trueda cliente gösterilsin mi demek evet dedik 
+                return Response<TDto>.Fail("Id not found", 404, true); 
             }
-            return Response<TDto>.Success(ObjectMapper.Mapper.Map<TDto>(product), 200); //product yukarda entity ama bizden tdto istiyor ondan dönüştürdük
+            return Response<TDto>.Success(ObjectMapper.Mapper.Map<TDto>(product), 200); 
         }
 
         public async Task<Response<NoDataDto>> Remove(int id)
@@ -53,32 +53,28 @@ namespace UdemyAuthServer.Service.Services
             {
                 return Response<NoDataDto>.Fail("Id not found",404,true);
             }
-            _genericRepository.Remove(isExistEntity); //memoryden sildi stateini delete olarak işaretledik
+            _genericRepository.Remove(isExistEntity); 
             await _unitOfWork.CommitAsync();
-            return Response<NoDataDto>.Success(204);//data dönmedik geriye - 204 no content bodyde hiç bir data olmayacak nodatadto oldugu için
+            return Response<NoDataDto>.Success(204);
         }
 
-        public async Task<Response<NoDataDto>> Update(TDto entity,int id) //tdto da alabilirsin id alırsak ama daha iyii
+        public async Task<Response<NoDataDto>> Update(TDto entity,int id) 
         {
             var isExistEntity = await _genericRepository.GetByIdAsync(id);
             if (isExistEntity ==null)
             {
                 return Response<NoDataDto>.Fail("Id not fount", 404, true);
             }
-            var updateEntity = ObjectMapper.Mapper.Map<TEntity>(entity);//geybyıdasync detache olarak işaretlenmişti
+            var updateEntity = ObjectMapper.Mapper.Map<TEntity>(entity);
             _genericRepository.Update(updateEntity);
             await _unitOfWork.CommitAsync();
-            return Response<NoDataDto>.Success(204); //client zaten görüyor update edilmiş datayı tekrar dönmeyee gerek yok
-
+            return Response<NoDataDto>.Success(204); 
         }
 
         public async Task<Response<IEnumerable<TDto>>> Where(Expression<Func<TEntity, bool>> predicate)
         {
-            //where(x=>x.id>5) x tentity karşılı kgeliyor id 5den büyük olması bool a karşılık geliyor
             var list = _genericRepository.Where(predicate);
-            //list.Take(5); //5tanesini getir dedik
-            //list.ToListAsync();//veritabanına yansır
-       
+
             return Response<IEnumerable<TDto>>.Success(ObjectMapper.Mapper.Map<IEnumerable<TDto>>(await list.ToListAsync()),200);
 
         }

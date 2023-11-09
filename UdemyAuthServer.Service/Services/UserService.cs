@@ -19,10 +19,10 @@ namespace UdemyAuthServer.Service.Services
         public async Task<Response<UserAppDto>> CreateUserAsync(CreateUserDto createUserDto)
         {
             var user = new UserApp { Email=createUserDto.Email,UserName=createUserDto.UserName};
-            var result = await _userManager.CreateAsync(user, createUserDto.Password); //user ve password istiyor bizden
+            var result = await _userManager.CreateAsync(user, createUserDto.Password); 
             if (!result.Succeeded)
             {
-                var errors = result.Errors.Select(x => x.Description).ToList(); //başarısız olma hatalarını aldık. 
+                var errors = result.Errors.Select(x => x.Description).ToList(); 
                 return Response<UserAppDto>.Fail(new ErrorDto(errors, true), 400);
             }
             return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), 200);

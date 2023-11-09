@@ -18,7 +18,7 @@ namespace UdemyAuthServer.Service.Services
         private readonly ITokenService _tokenService;
         private readonly UserManager<UserApp> _userManager;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IGenericRepository<UserRefreshToken> _userRefreshTokenService;//refreshleri veritabanına kaydeticez birde ona ihtiytacımız
+        private readonly IGenericRepository<UserRefreshToken> _userRefreshTokenService;
 
         public AuthenticationService(IOptions<List<Client>> optionsClient, ITokenService tokenService, UserManager<UserApp> userManager, IUnitOfWork unitOfWork, IGenericRepository<UserRefreshToken> userRefreshTokenService)
         {
@@ -38,18 +38,17 @@ namespace UdemyAuthServer.Service.Services
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
             if (user == null) 
-                return Response<TokenDto>.Fail("Email or Password is wrong", 400, true);//boş dönüyoruz - email veya şşşifre yanlış diyoruz çünkü kötü niyetli kullanıcı işifreyi zorlar email dogru oldugunu anlarsa
-                                                                                        //400 dönme sebebimiz client hatası çünkü  - client kullanıcılara gösterilsin mi true
+                return Response<TokenDto>.Fail("Email or Password is wrong", 400, true);
             if (!await _userManager.CheckPasswordAsync(user, loginDto.Password))
             {
-                return Response<TokenDto>.Fail("Email or Password is wrong", 400, true);//boş dönüyoruz - email veya şifre yanlış diyoruz çünkü kötü niyetli kullanıcı şifreyi zorlar email dogru oldugunu anlarsa
+                return Response<TokenDto>.Fail("Email or Password is wrong", 400, true);
 
             }
             var token = _tokenService.CreateToken(user);
-            var userRefreshToken = await _userRefreshTokenService.Where(x => x.UserId == user.Id).SingleOrDefaultAsync();//varsa gelecek yoksa gelmeyecek
-            if(userRefreshToken==null) //nullsa demek ki daha önce veritabanına bir refreshtoken kaydedilmemiş
+            var userRefreshToken = await _userRefreshTokenService.Where(x => x.UserId == user.Id).SingleOrDefaultAsync();
+            if(userRefreshToken==null) 
             {
-                await _userRefreshTokenService.AddAsync(new UserRefreshToken { UserId = user.Id, Code = token.RefreshToken, Expiration = token.RefreshTokenExpiration });//yeni bir refresh token oluşturuyoruz
+                await _userRefreshTokenService.AddAsync(new UserRefreshToken { UserId = user.Id, Code = token.RefreshToken, Expiration = token.RefreshTokenExpiration });
             }
             else
             {
@@ -58,12 +57,12 @@ namespace UdemyAuthServer.Service.Services
             }
 
             await _unitOfWork.CommitAsync();
-            return Response<TokenDto>.Success(token, 200);//responses ile tokeni döndük
+            return Response<TokenDto>.Success(token, 200);
         }
 
         public Response<ClientTokenDto> CreateTokenByClient(ClientLoginDto clientLoginDto)
         {
-            var client = _clients.SingleOrDefault(x => x.Id == clientLoginDto.ClientId && x.Secret == clientLoginDto.ClientSecret); //dtodan clientıd eşitse ve aynı zamanda clientten gelen secret a eşitse bu datayı dön
+            var client = _clients.SingleOrDefault(x => x.Id == clientLoginDto.ClientId && x.Secret == clientLoginDto.ClientSecret);
             if (client == null)
             {
                 return Response<ClientTokenDto>.Fail("ClientId or ClientSecret not found", 404, true);
@@ -87,8 +86,7 @@ namespace UdemyAuthServer.Service.Services
                 return Response<TokenDto>.Fail("User Id not found", 404, true);
             }
 
-            var tokenDto = _tokenService.CreateToken(user); //bir token dto geldi burdan
-            //yeni bir token oluşturdugunumza göre yeni token geldi bunu refresh tokeni güncelliyoruz
+            var tokenDto = _tokenService.CreateToken(user);
             existRefreshToken.Code = tokenDto.RefreshToken;
             existRefreshToken.Expiration = tokenDto.RefreshTokenExpiration;
 
@@ -104,7 +102,7 @@ namespace UdemyAuthServer.Service.Services
             {
                 return Response<NoDataDto>.Fail("Refresh token not found", 404, true);
             }
-            _userRefreshTokenService.Remove(existRefreshToken); //Memoryde deleted diye işaretlendi aşağıda siliyoruz
+            _userRefreshTokenService.Remove(existRefreshToken); 
 
             await _unitOfWork.CommitAsync();
             return Response<NoDataDto>.Success(200);
